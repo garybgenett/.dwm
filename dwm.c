@@ -211,6 +211,7 @@ static void tile(Monitor *);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void toggletag(const Arg *arg);
+static void ntoggleview(const Arg *arg);
 static void toggleview(const Arg *arg);
 static void unfocus(Client *c, Bool setfocus);
 static void unmanage(Client *c, Bool destroyed);
@@ -225,6 +226,7 @@ static void updatestatus(void);
 static void updatewindowtype(Client *c);
 static void updatetitle(Client *c);
 static void updatewmhints(Client *c);
+static void nview(const Arg *arg);
 static void view(const Arg *arg);
 static Client *wintoclient(Window w);
 static Monitor *wintomon(Window w);
@@ -1670,6 +1672,17 @@ toggletag(const Arg *arg) {
 }
 
 void
+ntoggleview(const Arg *arg) {
+	const Arg n = {.i = +1};
+	const int mon = selmon->num;
+	do {
+		focusmon(&n);
+		toggleview(arg);
+	}
+	while (selmon->num != mon);
+}
+
+void
 toggleview(const Arg *arg) {
 	unsigned int newtagset = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);
 
@@ -1965,6 +1978,17 @@ updatewmhints(Client *c) {
 			c->neverfocus = False;
 		XFree(wmh);
 	}
+}
+
+void
+nview(const Arg *arg) {
+	const Arg n = {.i = +1};
+	const int mon = selmon->num;
+	do {
+		focusmon(&n);
+		view(arg);
+	}
+	while (selmon->num != mon);
 }
 
 void
