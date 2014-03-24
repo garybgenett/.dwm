@@ -63,7 +63,7 @@ enum { NetSupported, NetWMName, NetWMState,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetWMWindowTypeDialog, NetClientList, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
+enum { ClkTagBar, ClkLtSymbol, ClkMonNum, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 
 typedef union {
@@ -238,7 +238,7 @@ static const char broken[] = "broken";
 static char stext[256];
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
-static int bh, blw = 0;      /* bar geometry */
+static int bh, blw, bmw = 0; /* bar geometry */
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent]) (XEvent *) = {
@@ -432,6 +432,8 @@ buttonpress(XEvent *e) {
 		}
 		else if(ev->x < x + blw)
 			click = ClkLtSymbol;
+		else if(ev->x < x + blw + bmw)
+			click = ClkMonNum;
 		else if(ev->x > selmon->ww - TEXTW(stext))
 			click = ClkStatusText;
 		else
@@ -714,6 +716,12 @@ drawbar(Monitor *m) {
 	drw_setscheme(drw, &scheme[SchemeNorm]);
 	drw_text(drw, x, 0, w, bh, m->ltsymbol, 0);
 	x += w;
+	char custom[4] = {0}; // needs to be +1 of actual size, for some reason
+	snprintf(custom, sizeof(custom), "<%d>", m->num);
+	w = bmw = TEXTW(custom);
+	drw_setscheme(drw, m == selmon ? &scheme[SchemeSel] : &scheme[SchemeNorm]);
+	drw_text(drw, x, 0, w, bh, custom, 0);
+	x += w;
 	xx = x;
 	if(m == selmon) { /* status is only drawn on selected monitor */
 		w = TEXTW(stext);
@@ -722,6 +730,7 @@ drawbar(Monitor *m) {
 			x = xx;
 			w = m->ww - xx;
 		}
+		drw_setscheme(drw, &scheme[SchemeNorm]);
 		drw_text(drw, x, 0, w, bh, stext, 0);
 	}
 	else
