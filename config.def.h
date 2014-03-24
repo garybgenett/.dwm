@@ -31,6 +31,7 @@ static const float mfact      = 0.55; /* factor of master area size [0.05..0.95]
 static const int nmaster      = 1;    /* number of clients in master area */
 static const int nviews       = 1;    /* number of tags highlighted by default */
 static const Bool resizehints = True; /* True means respect size hints in tiled resizals */
+static const Bool statusall   = False;/* True means status is shown in all bars, not just active monitor */
 
 static const int master[1];           /* nmaster override per monitor */
 //static const int master[] = {1,-1}; /* monitor 0 = nmaster 1, monitor 1 = no nmaster (all vertical) */
