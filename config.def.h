@@ -29,7 +29,13 @@ static const Rule rules[] = {
 /* layout(s) */
 static const float mfact      = 0.55; /* factor of master area size [0.05..0.95] */
 static const int nmaster      = 1;    /* number of clients in master area */
+static const int nviews       = 1;    /* number of tags highlighted by default */
 static const Bool resizehints = True; /* True means respect size hints in tiled resizals */
+
+static const int master[1];           /* nmaster override per monitor */
+//static const int master[] = {1,-1}; /* monitor 0 = nmaster 1, monitor 1 = no nmaster (all vertical) */
+static const int views[1];            /* nviews override per monitor */
+//static const int views[]  = {4,~0}; /* monitor 0 = nviews 4, monitor 1 = all (all highlighted) */
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
@@ -91,6 +97,7 @@ static Key keys[] = {
 	TAGKEYS(                        XK_7,                      6)
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
+	{ MODKEY,                       XK_grave,  reset_view,     {0} },
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
 };
 
@@ -101,6 +108,7 @@ static Button buttons[] = {
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkMonNum,            0,              Button1,        focusmon,       {.i = +1} },
+	{ ClkMonNum,            0,              Button2,        reset_view,     {0} },
 	{ ClkMonNum,            0,              Button3,        focusmon,       {.i = -1} },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
 	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
