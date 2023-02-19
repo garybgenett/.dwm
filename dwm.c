@@ -236,6 +236,7 @@ static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
+static void reset_view(const Arg *arg);
 
 /* variables */
 static const char broken[] = "broken";
@@ -2168,6 +2169,33 @@ zoom(const Arg *arg)
 	pop(c);
 }
 
+void
+reset_view(const Arg *arg) {
+	const int mon = selmon->num;
+	Arg n = {.i = +1};	// focusmon(next monitor)
+	Arg m = {.f = 0};	// mfact -> facts[]
+	Arg i = {.i = 0};	// nmaster -> masters[]
+	Arg v = {.ui = 0};	// nviews -> views[]
+	Arg t = {.ui = 0};	// toggles[] -> toggleview()
+	unsigned int x;
+	do {
+		focusmon(&n);
+		m.f = (facts[selmon->num] ? facts[selmon->num] : mfact) +1;
+		i.i = (masters[selmon->num] ? masters[selmon->num] : nmaster) - selmon->nmaster;
+		v.ui = (views[selmon->num] == ~0 ? ~0 : ((1 << (views[selmon->num] ? (views[selmon->num] +1) : (nviews +1))) -1));
+		setmfact(&m);
+		incnmaster(&i);
+		view(&v);
+		for (x = 0; x < LENGTH(toggles[selmon->num]); x++) {
+			if ((toggles[selmon->num][x] || toggles[selmon->num][x] == 0) && toggles[selmon->num][x] != ~0) {
+				t.ui = (1 << toggles[selmon->num][x]);
+				toggleview(&t);
+			};
+		}
+	}
+	while (selmon->num != mon);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -2186,6 +2214,8 @@ main(int argc, char *argv[])
 		die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
+	const Arg r = {0};
+	reset_view(&r);
 	run();
 	cleanup();
 	XCloseDisplay(dpy);
