@@ -1,3 +1,8 @@
+This is a customized fork of [dwm](http://dwm.suckless.org), where the
+[multimon](http://dwm.suckless.org/patches/multimon) patches are maintained.
+
+----
+
 dwm - dynamic window manager
 ============================
 dwm is an extremely fast, small, and dynamic window manager for X.
