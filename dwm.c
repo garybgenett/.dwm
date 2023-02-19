@@ -210,6 +210,7 @@ static void setup(void);
 static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
 static void spawn(const Arg *arg);
+static void swapfocus(const Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
 static void tile(Monitor *m);
@@ -242,6 +243,7 @@ static void zoom(const Arg *arg);
 static void reset_view(const Arg *arg);
 
 /* variables */
+static Client *prevclient = NULL;
 static const char broken[] = "broken";
 static char stext[256];
 static int screen;
@@ -1729,6 +1731,18 @@ spawn(const Arg *arg)
 }
 
 void
+swapfocus(const Arg *arg)
+{
+	Client *c;
+
+	for(c = selmon->clients; c && c != prevclient; c = c->next) ;
+	if(c == prevclient) {
+		focus(prevclient);
+		restack(prevclient->mon);
+	}
+}
+
+void
 tag(const Arg *arg)
 {
 	if (selmon->sel && arg->ui & TAGMASK) {
@@ -1841,6 +1855,7 @@ unfocus(Client *c, int setfocus)
 {
 	if (!c)
 		return;
+	prevclient = c;
 	grabbuttons(c, 0);
 	XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
 	if (setfocus) {
@@ -2220,11 +2235,13 @@ void
 zoom(const Arg *arg)
 {
 	Client *c = selmon->sel;
+	prevclient = nexttiled(selmon->clients);
 
 	if (!selmon->lt[selmon->sellt]->arrange || !c || c->isfloating)
 		return;
 	if (c == nexttiled(selmon->clients) && !(c = nexttiled(c->next)))
-		return;
+		if (!c || !(c = prevclient = nexttiled(c->next)))
+			return;
 	pop(c);
 }
 
